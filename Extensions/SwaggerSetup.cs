@@ -1,6 +1,6 @@
 ﻿using Microsoft.OpenApi.Models;
 
-namespace PicEnfermagem.Api.Extensions;
+namespace App.Extensions;
 
 public static class SwaggerSetup
 {

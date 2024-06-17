@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using ASP.NET_Core_Template.Ioc;
+using App.Ioc;
 using Infrastructure.Context;
-using PicEnfermagem.Api.Extensions;
+using App.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

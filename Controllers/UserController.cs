@@ -8,7 +8,7 @@ using Application.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ASP.NET_Core_Template.Controllers
+namespace App.Controllers
 {
     public class UserController : Controller
     {

@@ -5,9 +5,8 @@ using Domain.Entitites;
 using Infrastructure.Context;
 using Infrastructure.Repositories.BaseRepository;
 using Microsoft.AspNetCore.Identity;
-using PicEnfermagem.Api.Extensions;
 
-namespace ASP.NET_Core_Template.Ioc
+namespace App.Ioc
 {
     public static class NativeInjectorConfig
     {
