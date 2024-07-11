@@ -14,6 +14,8 @@ namespace Infrastructure.Repositories.BaseRepository
         void UpdateAsync(TEntity entity);
         Task<TEntity> GetAsync(int id);
         Task<IEnumerable<TEntity>> GetAllAsync();
-        Task<IEnumerable<TEntity>> GetAllWhereAsync(Expression<Func<TEntity, bool>> filter);
+        Task<IEnumerable<TEntity>> GetAllAsync(params Expression<Func<TEntity, object>>[] includes);
+        Task<IEnumerable<TEntity>> GetAllWhere(Expression<Func<TEntity, bool>> filter);
+        Task<IEnumerable<TEntity>> GetAllWhere(Expression<Func<TEntity, bool>> filter, params Expression<Func<TEntity, object>>[] includes);
     }
 }
