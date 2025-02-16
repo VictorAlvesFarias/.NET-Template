@@ -9,6 +9,5 @@ namespace App.Application.Configuration
         public int AccessTokenExpiration { get; set; }
         public string SecurityKey { get; set; }
         public SigningCredentials SigningCredentials { get; set; }
-
     }
 }

@@ -11,17 +11,13 @@ namespace App.Extensions
     {
         public static void AddAuthentication(this IServiceCollection services, IConfiguration configuration)
         {
-            //Pega o valor das configurações do Jwt
             var JwtAppSettings = configuration.GetSection(nameof(JwtOptions)).Get<JwtOptions>();
-
-            //Generate security key access
             var securityKey = new SymmetricSecurityKey(
                 Encoding.ASCII.GetBytes(
                     JwtAppSettings.SecurityKey
                 )
             );
 
-            //Requisitos de Token
             var tokenValidationParameters = new TokenValidationParameters { 
                 ValidateIssuer = true,ValidIssuer = JwtAppSettings.Issuer,
                 ValidateAudience = true, ValidAudience =JwtAppSettings.Audience,
@@ -31,7 +27,6 @@ namespace App.Extensions
                 ValidateLifetime = true
             };
 
-            //Configuração de geração de Token
             services.Configure<JwtOptions>(options => {
                 options.Issuer = JwtAppSettings.Issuer;
                 options.Audience = JwtAppSettings.Audience;
@@ -42,7 +37,6 @@ namespace App.Extensions
                 options.AccessTokenExpiration = JwtAppSettings.AccessTokenExpiration;
             });
 
-            //Requisitos de geração de senha senha
             services.Configure<IdentityOptions>(options => {
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;
@@ -53,7 +47,6 @@ namespace App.Extensions
                 options.User.AllowedUserNameCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_-.";
             });
 
-            //Adiciona a autenticação 
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
