@@ -83,7 +83,7 @@ namespace Application.Services.Identity
             {
                 UserName = userData.Username,
                 Email = userData.Email,
-                CreateUserDate = DateTime.UtcNow,
+                CreateDate = DateTime.UtcNow,
                 EmailConfirmed = false,
                 Name = userData.Name,
             };

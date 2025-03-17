@@ -1,94 +1,81 @@
-﻿using Infrastructure.Context;
+﻿using Domain.Entitites;
+using Infrastructure.Context;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories.BaseRepository
 {
-    //Definição dos tipos do repositorio generico, o parametro "where", define que ela deve ser do tipo TEntity
-    //E o tipo TEntity deve ser uma classe, observe no arquivo de Ioc
     public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : class
     {
-
         private readonly DbSet<TEntity> _entity;
-
         private readonly ApplicationContext _context;
 
-        public BaseRepository(ApplicationContext entity)
+        public BaseRepository(
+            ApplicationContext entity
+        )
         {
             _entity = entity.Set<TEntity>();
             _context = entity;
         }
 
-        public async void AddAsync(TEntity entity)
+        public async Task<TEntity> AddAsync(TEntity entity)
         {
-            await _entity.AddAsync(entity);
+            if (entity is BaseEntityUserRelation)
+            {
+                var baseEntity = entity as BaseEntityUserRelation;
+
+                if (baseEntity is not null)
+                {
+                    baseEntity.SetUser(_context.GetUserId());
+                }
+            }
+
+            var result = await _entity.AddAsync(entity);
 
             _context.SaveChanges();
-        }
 
-        public async void RemoveAsync(TEntity item)
+            return result.Entity;
+        }
+        public bool RemoveAsync(TEntity item)
         {
             _context.Remove(item);
 
             _context.SaveChanges();
-        }
 
-        public async void UpdateAsync(TEntity entity)
+            return true;
+        }
+        public bool RemoveAsync(int id)
+        {
+            _context.Remove(_entity.FindAsync(id).Result);
+            _context.SaveChanges();
+
+            return true;
+        }
+        public bool UpdateAsync(TEntity entity)
         {
             _entity.Update(entity);
 
             _context.SaveChanges();
-        }
 
+            return true;
+        }
         public async Task<TEntity> GetAsync(int id)
         {
-            var result = await _entity.FindAsync(id);
+            var item = await _entity.FindAsync(id);
 
-            return result;
+            return item;
         }
-
-        public async Task<IEnumerable<TEntity>> GetAllAsync()
-        {
-            var result = await _entity.AsNoTracking().ToListAsync();
-
-            return result;
-        }
-        public async Task<IEnumerable<TEntity>> GetAllAsync(params Expression<Func<TEntity, object>>[] includes)
+        public IQueryable<TEntity> GetAll()
         {
             IQueryable<TEntity> query = _entity;
 
-            if (includes != null)
+            if (typeof(BaseEntityUserRelation).IsAssignableFrom(typeof(TEntity)))
             {
-                foreach (var include in includes)
-                {
-                    query = query.Include(include);
-                }
+                var userId = _context.GetUserId();
+                var newQuery = query.OfType<BaseEntityUserRelation>().Where(x => x.UserId == userId).Cast<TEntity>();
+                return newQuery;
             }
 
-            return await query.AsNoTracking().ToListAsync();
-        }
-
-        public async Task<IEnumerable<TEntity>> GetAllWhere(Expression<Func<TEntity,bool>> filter)
-        {
-            var result = _entity.Where(filter) ;
-
-            return result;
-        }
-        public async Task<IEnumerable<TEntity>> GetAllWhere(Expression<Func<TEntity, bool>> filter, params Expression<Func<TEntity, object>>[] includes)
-        {
-            IQueryable<TEntity> query = _entity;
-
-            if (includes != null)
-            {
-                foreach (var include in includes)
-                {
-                    query = query.Include(include);
-                }
-            }
-
-            var result = query.Where(filter);
-
-            return result;
+            return query;
         }
     }
 }

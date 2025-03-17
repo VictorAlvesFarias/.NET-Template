@@ -8,10 +8,8 @@ using System.Threading.Tasks;
 
 namespace Domain.Entitites
 {
-    public class ApplicationUser: IdentityUser
+    public class ApplicationUser: BaseEntityIdentity
     {
-        public DateTime CreateUserDate { get; set; }
-
         public string Name { get; set; }
     }
 }
