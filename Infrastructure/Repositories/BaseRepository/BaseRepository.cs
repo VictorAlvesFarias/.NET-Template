@@ -35,7 +35,7 @@ namespace Infrastructure.Repositories.BaseRepository
 
             return result.Entity;
         }
-        public bool RemoveAsync(TEntity item)
+        public bool Remove(TEntity item)
         {
             _context.Remove(item);
 
@@ -43,14 +43,14 @@ namespace Infrastructure.Repositories.BaseRepository
 
             return true;
         }
-        public bool RemoveAsync(int id)
+        public bool Remove(int id)
         {
             _context.Remove(_entity.FindAsync(id).Result);
             _context.SaveChanges();
 
             return true;
         }
-        public bool UpdateAsync(TEntity entity)
+        public bool Update(TEntity entity)
         {
             _entity.Update(entity);
 
