@@ -1,81 +1,63 @@
 ﻿using Domain.Entitites;
 using Infrastructure.Context;
+using Infrastructure.Factories.DbContextFactory;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Infrastructure.Repositories.BaseRepository
 {
     public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : class
     {
         private readonly DbSet<TEntity> _entity;
-        private readonly ApplicationContext _context;
+        private readonly DbContext _context;
 
-        public BaseRepository(
-            ApplicationContext entity
-        )
+        public BaseRepository(DbContextFactory dbContextFactory)
         {
-            _entity = entity.Set<TEntity>();
-            _context = entity;
+            _context = dbContextFactory.CreateDbContext<TEntity>();
+            _entity = _context.Set<TEntity>();
         }
 
         public async Task<TEntity> AddAsync(TEntity entity)
         {
-            if (entity is BaseEntityUserRelation)
-            {
-                var baseEntity = entity as BaseEntityUserRelation;
-
-                if (baseEntity is not null)
-                {
-                    baseEntity.SetUser(_context.GetUserId());
-                }
-            }
-
             var result = await _entity.AddAsync(entity);
-
-            _context.SaveChanges();
-
+            await _context.SaveChangesAsync();
             return result.Entity;
         }
+
         public bool Remove(TEntity item)
         {
             _context.Remove(item);
-
             _context.SaveChanges();
-
             return true;
         }
+
         public bool Remove(int id)
         {
-            _context.Remove(_entity.FindAsync(id).Result);
-            _context.SaveChanges();
-
-            return true;
+            var entity = _entity.Find(id);
+            if (entity != null)
+            {
+                _context.Remove(entity);
+                _context.SaveChanges();
+                return true;
+            }
+            return false;
         }
+
         public bool Update(TEntity entity)
         {
             _entity.Update(entity);
-
             _context.SaveChanges();
-
             return true;
         }
-        public async Task<TEntity> GetAsync(int id)
-        {
-            var item = await _entity.FindAsync(id);
 
-            return item;
+        public TEntity GetById(int id)
+        {
+            return _entity.Find(id);
         }
-        public IQueryable<TEntity> GetAll()
+
+        public IQueryable<TEntity> Get()
         {
-            IQueryable<TEntity> query = _entity;
-
-            if (typeof(BaseEntityUserRelation).IsAssignableFrom(typeof(TEntity)))
-            {
-                var userId = _context.GetUserId();
-                var newQuery = query.OfType<BaseEntityUserRelation>().Where(x => x.UserId == userId).Cast<TEntity>();
-                return newQuery;
-            }
-
-            return query;
+            return _entity;
         }
     }
 }

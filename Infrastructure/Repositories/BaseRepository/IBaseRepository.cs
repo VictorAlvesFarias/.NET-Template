@@ -6,7 +6,7 @@
         bool Remove(TEntity item);
         bool Remove(int id);
         bool Update(TEntity entity);
-        Task<TEntity> GetAsync(int id);
-        IQueryable<TEntity> GetAll();
+        TEntity GetById(int id);
+        IQueryable<TEntity> Get();
     }
 }
