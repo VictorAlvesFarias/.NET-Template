@@ -1,4 +1,5 @@
 ﻿using App.Application.Configuration;
+using Application.Dtos;
 using Application.Dtos.Default;
 using Application.Dtos.User.Create;
 using Application.Dtos.User.Login;
@@ -57,7 +58,7 @@ namespace Application.Services.Identity
 
                 else 
                 {
-                    response.AddErrors(result.Errors.ToList().ConvertAll<string>(item=> item.Description));
+                    response.AddErrors(result.Errors.ToList().ConvertAll(e=>new ErrorMessage(e.Description)));
 
                     response.Success = false;
                 }
@@ -68,7 +69,7 @@ namespace Application.Services.Identity
 
             else
             {
-                response.AddError("Faça login novamente e tente mais tarde.");
+                response.AddError(new ErrorMessage("Faça login novamente e tente mais tarde."));
 
                 response.Success = false;
 
@@ -112,7 +113,7 @@ namespace Application.Services.Identity
 
             else
             {
-                response.AddError("Senha ou Usuario incorretos.");
+                response.AddError(new ErrorMessage("Senha ou Usuario incorretos."));
 
                 return response;
             }
@@ -131,7 +132,7 @@ namespace Application.Services.Identity
 
             else
             {
-                response.AddError("E-mail ja utilizado.");
+                response.AddError(new ErrorMessage("E-mail ja utilizado."));
 
                 return response;
             }
@@ -163,7 +164,7 @@ namespace Application.Services.Identity
 
             else
             {
-                response.AddError("Senha ou Usuario incorretos.");
+                response.AddError(new ErrorMessage("Senha ou Usuario incorretos."));
 
                 return response;
             }
@@ -282,7 +283,7 @@ namespace Application.Services.Identity
 
             else
             {
-                response.AddError("Nome de usuário já utilizado.");
+                response.AddError(new ErrorMessage("Nome de usuário já utilizado."));
 
                 return response;
             }
@@ -303,7 +304,7 @@ namespace Application.Services.Identity
 
             else
             {
-                response.AddErrors(changedPassword.Errors.ToList().ConvertAll<string>(item => item.Description));
+                response.AddErrors(changedPassword.Errors.ToList().ConvertAll(item => new ErrorMessage(item.Description)));
             }
 
             throw new NotImplementedException();
