@@ -5,6 +5,7 @@ using Application.Dtos.User.Password;
 using Application.Dtos.User.Put;
 using Application.Dtos.User.Validate;
 using Application.Services.Identity;
+using ASP.NET_Core_Template.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,17 +26,7 @@ namespace App.Controllers
         {
             var result = await _identityService.AddUser(userData);
 
-            if (result.Success)
-            {
-                return Ok(result);
-            }
-
-            else if (result.Errors.Count > 0)
-            {
-                return BadRequest(result);
-            }
-
-            return StatusCode(StatusCodes.Status500InternalServerError);
+            return this.DefaultResult(result);
         }
 
         [HttpPost("/sign-in")]
@@ -43,17 +34,7 @@ namespace App.Controllers
         {
             var result = await _identityService.LoginAsync(loginData);
 
-            if (result.Success)
-            {
-                return Ok(result);
-            }
-
-            else if (result.Errors.Count > 0)
-            {
-                return BadRequest(result);
-            }
-
-            return StatusCode(StatusCodes.Status500InternalServerError);
+            return this.Result<LoginUserResponse>(result);
         }
 
         [Authorize]
@@ -62,17 +43,7 @@ namespace App.Controllers
         {
             var result = await _identityService.DeleteUser(loginData);
 
-            if (result.Success)
-            {
-                return Ok(result);
-            }
-
-            else if (result.Errors.Count > 0)
-            {
-                return BadRequest(result);
-            }
-
-            return StatusCode(StatusCodes.Status500InternalServerError);
+            return this.DefaultResult(result);
         }
 
         [Authorize]
@@ -81,17 +52,7 @@ namespace App.Controllers
         {
             var result = await _identityService.PutUser(userData);
 
-            if (result.Success)
-            {
-                return Ok(result);
-            }
-
-            else if (result.Errors.Count > 0)
-            {
-                return BadRequest(result);
-            }
-
-            return StatusCode(StatusCodes.Status500InternalServerError);
+            return this.DefaultResult(result);
         }
 
         [HttpPost("/validade-email")]
@@ -99,17 +60,7 @@ namespace App.Controllers
         {
             var result = await _identityService.ValidateEmailAsync(validate.Email);
 
-            if (result.Success)
-            {
-                return Ok(result);
-            }
-
-            else if (result.Errors.Count > 0)
-            {
-                return BadRequest(result);
-            }
-
-            return StatusCode(StatusCodes.Status500InternalServerError);
+            return this.DefaultResult(result);
         }
 
         [HttpPost("/validate-username")]
@@ -117,17 +68,7 @@ namespace App.Controllers
         {
             var result = await _identityService.ValidateUsernameAsync(validate.Username);
 
-            if (result.Success)
-            {
-                return Ok(result);
-            }
-
-            else if (result.Errors.Count > 0)
-            {
-                return BadRequest(result);
-            }
-
-            return StatusCode(StatusCodes.Status500InternalServerError);
+            return this.DefaultResult(result);
         }
 
         [Authorize]
@@ -136,18 +77,7 @@ namespace App.Controllers
         {
             var result = await _identityService.ChangePasswordAsync(changePasswordData);
 
-            if (result.Success)
-            {
-                return Ok(result);
-            }
-
-            else if (result.Errors.Count > 0)
-            {
-                return BadRequest(result);
-            }
-
-            return StatusCode(StatusCodes.Status500InternalServerError);
+            return this.DefaultResult(result);
         }
-
     }
 }

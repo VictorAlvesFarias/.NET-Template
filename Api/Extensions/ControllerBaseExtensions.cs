@@ -16,7 +16,7 @@ namespace ASP.NET_Core_Template.Extensions
                 }
                 else if (result.Errors.Count > 0)
                 {
-                    return controller.StatusCode(result.Errors.First().StatusCode, result)
+                    return controller.StatusCode(result.Errors.First().StatusCode, result);
                 }
 
                 return controller.StatusCode(StatusCodes.Status500InternalServerError);

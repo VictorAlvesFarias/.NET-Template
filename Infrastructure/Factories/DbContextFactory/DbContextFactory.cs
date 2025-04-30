@@ -15,13 +15,18 @@ namespace Infrastructure.Factories.DbContextFactory
 
         public DbContext CreateDbContext<TEntity>() where TEntity : class
         {
+            if (typeof(TEntity).Namespace == null)
+            {
+                throw new ArgumentException($"Entity {typeof(TEntity).Name} not contains namespace.");
+            }
+
             if (typeof(TEntity).Namespace.Contains("Domain.Entitites"))
             {
                 return _serviceProvider.GetRequiredService<ApplicationContext>();
             }
             else
             {
-                return _serviceProvider.GetRequiredService<ApplicationContext>(); // Default
+                return _serviceProvider.GetRequiredService<ApplicationContext>(); 
             }
         }
     }
