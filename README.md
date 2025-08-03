@@ -274,90 +274,140 @@ public static void RegisterServices(IServiceCollection services, IConfiguration 
 }
 ```
 
-### Service Response Patterns
 
-Services should return standardized response objects. Here's how to implement them:
+---
 
-**Success Response Example:**
-```csharp
-public async Task<BaseResponse<LoginUserResponse>> LoginAsync(LoginUserRequest request)
+## Response & Error System
+
+This template's response and error system ensures that all API responses are standardized, making it easier for frontends to consume and for backend maintenance.
+
+### Overview
+
+- All operations return response objects with information about success, data, errors, and exceptions.
+- Controllers use extension methods to automatically map HTTP status codes.
+- The pattern makes testing, integration, and error handling easier.
+
+### Class Hierarchy
+
+| Class              | Description                                      |
+|--------------------|--------------------------------------------------|
+| DataResponse       | Base for responses, contains errors/exceptions    |
+| BaseResponse<T>    | Generic response with typed payload               |
+| DefaultResponse    | Simple response without data                      |
+| FileResponse       | Response for file downloads                       |
+| ErrorMessage       | Error/exception structure                         |
+
+### Response Structure
+
+```json
 {
-    var response = new BaseResponse<LoginUserResponse>();
-    
-    // Business logic here
-    var user = await _userManager.FindByEmailAsync(request.Email);
-    if (user != null && await _userManager.CheckPasswordAsync(user, request.Password))
-    {
-        response.Success = true;
-        response.Data = new LoginUserResponse 
-        { 
-            Token = GenerateJwtToken(user),
-            UserId = user.Id 
-        };
-        return response;
-    }
-    
-    response.AddError(new ErrorMessage("Invalid email or password", 401));
-    return response;
+  "success": true,
+  "data": { /* data */ },
+  "errors": [],
+  "exceptions": []
 }
 ```
 
-**Error Response Example:**
-```csharp
-public async Task<DefaultResponse> ValidateEmailAsync(string email)
+### Error Structure
+
+```json
 {
-    var response = new DefaultResponse();
-    
-    if (string.IsNullOrEmpty(email))
-    {
-        response.AddError(new ErrorMessage("Email is required", 400, "EMAIL_REQUIRED"));
-        return response;
-    }
-    
-    var existingUser = await _userManager.FindByEmailAsync(email);
-    if (existingUser != null)
-    {
-        response.AddError(new ErrorMessage("Email already exists", 400, "EMAIL_EXISTS"));
-        return response;
-    }
-    
-    response.Success = true;
-    return response;
+  "success": false,
+  "data": null,
+  "errors": [
+    { "message": "Error message", "code": "VALIDATION_ERROR", "statusCode": 400 }
+  ],
+  "exceptions": [
+    { "message": "Internal error", "code": "INTERNAL_ERROR", "statusCode": 500 }
+  ]
 }
 ```
 
-**Exception Handling Example:**
+### HTTP Status Mapping
+
+| Status | Situation                  |
+|--------|----------------------------|
+| 200    | Success                    |
+| 400    | Validation/input error     |
+| 401    | Unauthorized               |
+| 403    | Forbidden                  |
+| 404    | Not found                  |
+| 500    | Internal error             |
+
+### Main Classes
+
 ```csharp
-public async Task<DefaultResponse> CreateUserAsync(CreateUserRequest request)
+public class ErrorMessage
 {
-    var response = new DefaultResponse();
-    
-    try
-    {
-        // Business logic that might throw exceptions
-        var user = new ApplicationUser { UserName = request.Username, Email = request.Email };
-        var result = await _userManager.CreateAsync(user, request.Password);
-        
-        if (result.Succeeded)
-        {
-            response.Success = true;
-            return response;
-        }
-        
-        foreach (var error in result.Errors)
-        {
-            response.AddError(new ErrorMessage(error.Description, 400));
-        }
-    }
-    catch (Exception ex)
-    {
-        response.AddException(new ErrorMessage("An error occurred while creating the user", 500));
-        // Log the actual exception details
-    }
-    
-    return response;
+    public string Message { get; set; }
+    public string Code { get; set; }
+    public int StatusCode { get; set; } = 400;
 }
 ```
+
+```csharp
+public class DataResponse
+{
+    public bool Success { get; set; } = false;
+    public List<ErrorMessage> Errors { get; set; } = new();
+    public List<ErrorMessage> Exceptions { get; set; } = new();
+
+    public void AddError(ErrorMessage error)
+    {
+        Success = false;
+        Errors.Add(error);
+    }
+
+    public void AddException(ErrorMessage error)
+    {
+        Success = false;
+        Exceptions.Add(error);
+    }
+}
+```
+
+```csharp
+public class BaseResponse<T> : DataResponse
+{
+    public T Data { get; set; }
+}
+```
+
+### Visual Flow Example
+
+```mermaid
+flowchart TD
+    A[Controller] -->|Calls Service| B(Service)
+    B -->|Returns BaseResponse| C[Controller]
+    C -->|Result<T>| D[HTTP Response]
+```
+
+### Usage Examples
+
+**Success:**
+```csharp
+var response = new BaseResponse<LoginUserResponse> {
+    Success = true,
+    Data = new LoginUserResponse { Token = "...", UserId = "..." }
+};
+```
+
+**Validation Error:**
+```csharp
+response.AddError(new ErrorMessage("Invalid email", "EMAIL_INVALID", 400));
+```
+
+**Exception:**
+```csharp
+response.AddException(new ErrorMessage("Internal error", "INTERNAL_ERROR", 500));
+```
+
+**In Controller:**
+```csharp
+return this.Result<LoginUserResponse>(response);
+```
+
+---
 
 ### Response Handling
 
@@ -595,14 +645,6 @@ WORKDIR /app
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "Api.dll"]
 ```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes following the established patterns
-4. Add tests for new functionality
-5. Submit a pull request
 
 ## License
 
